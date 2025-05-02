@@ -31,6 +31,8 @@ std::vector<Enemy> enemies;
 bool keyStates[256] = { false };
 int windowWidth = 800, windowHeight = 600;
 int score = 0;
+bool gameWon = false;
+bool showEndMenu = false;
 
 void drawText(float x, float y, std::string text) {
     glRasterPos2f(x, y);
@@ -103,7 +105,7 @@ void spawnEnemy() {
     e.dir.x = (rand() % 200 - 100) / 5000.0f;
     e.dir.y = (rand() % 200 - 100) / 5000.0f;
     e.speed = score >= 10 ? 0.006f : 0.003f;
-    e.shootCooldown = 120; // 2 seconds assuming ~60 FPS
+    e.shootCooldown = 120;
     e.health = score >= 10 ? 2 : 1;
     e.alive = true;
     enemies.push_back(e);
@@ -130,7 +132,7 @@ void updateEnemies() {
     for (size_t i = 0; i < enemies.size(); ++i) {
         Enemy &e = enemies[i];
         if (!e.alive) continue;
-        e.pos.x += e.dir.x * e.speed * 1;
+        e.pos.x += e.dir.x * e.speed;
         e.pos.y += e.dir.y * e.speed * 10;
 
         if (e.pos.x < -1 || e.pos.x > 1) e.dir.x *= -1;
@@ -148,7 +150,7 @@ void updateEnemies() {
             b.speed = 0.009f;
             b.fromEnemy = true;
             bullets.push_back(b);
-            e.shootCooldown = 5000; // reset to 2 seconds
+            e.shootCooldown = 5000;
         }
     }
 }
@@ -163,7 +165,7 @@ void handleCollisions() {
             float dy = b.pos.y - playerPos.y;
             if (dx * dx + dy * dy < 0.01f) {
                 b.alive = false;
-                score--;
+                // score--; // لم نعد نقلل النقاط
             }
         } else {
             for (size_t j = 0; j < enemies.size(); ++j) {
@@ -177,7 +179,12 @@ void handleCollisions() {
                     if (e.health <= 0) {
                         e.alive = false;
                         score++;
-                        spawnEnemy(); // respawn new enemy immediately
+                        if (score >= 10) {
+                            gameWon = true;
+                            showEndMenu = true;
+                        } else {
+                            spawnEnemy();
+                        }
                     }
                 }
             }
@@ -192,20 +199,48 @@ void display() {
         if (bullets[i].alive) drawBullet(bullets[i].pos.x, bullets[i].pos.y, bullets[i].fromEnemy);
     for (size_t i = 0; i < enemies.size(); ++i)
         if (enemies[i].alive) drawEnemy(enemies[i].pos.x, enemies[i].pos.y);
+
     drawText(-0.95f, 0.9f, "Score: " + std::to_string(score));
+
+    if (gameWon) {
+        drawText(-0.15f, 0.2f, "YOU WIN!");
+        if (showEndMenu) {
+            drawText(-0.2f, 0.0f, "Press R to Restart");
+            drawText(-0.2f, -0.1f, "Press Q to Quit");
+        }
+    }
+
     glutSwapBuffers();
 }
 
 void idle() {
-    updatePlayer();
-    updateBullets();
-    updateEnemies();
-    handleCollisions();
-    while (enemies.size() < 2) spawnEnemy();
+    if (!gameWon) {
+        updatePlayer();
+        updateBullets();
+        updateEnemies();
+        handleCollisions();
+        while (enemies.size() < 2) spawnEnemy();
+    }
     glutPostRedisplay();
 }
 
 void keyDown(unsigned char key, int, int) {
+    if (showEndMenu) {
+        if (key == 'r' || key == 'R') {
+            // إعادة التشغيل
+            bullets.clear();
+            enemies.clear();
+            playerPos = {0.0f, 0.0f};
+            score = 0;
+            gameWon = false;
+            showEndMenu = false;
+            spawnEnemy();
+        } else if (key == 'q' || key == 'Q') {
+            exit(0);
+        }
+        return;
+    }
+
     keyStates[key] = true;
 }
 
@@ -214,7 +249,7 @@ void keyUp(unsigned char key, int, int) {
 }
 
 void mouseClick(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && !gameWon) {
         float normX = (x / (float)windowWidth) * 2 - 1;
         float normY = -((y / (float)windowHeight) * 2 - 1);
         Vec2 dir = { normX - playerPos.x, normY - playerPos.y };
