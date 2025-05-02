@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1746216773 source:c:\users\youssef elmahdi\desktop\tolba\game\main.cpp
+	<GL/freeglut.h>
+	<vector>
+	<cmath>
+	<ctime>
+	<cstdlib>
+	<string>
+
