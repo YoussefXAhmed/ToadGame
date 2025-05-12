@@ -89,4 +89,4 @@ You can build and run the project in any IDE like **Visual Studio**, or simply c
 
 ## Gameplay Screenshots
 
-![Screenshot 1](![image](https://github.com/user-attachments/assets/43944560-958f-4463-988a-d1364e829cba)
+Screenshot ![image](https://github.com/user-attachments/assets/43944560-958f-4463-988a-d1364e829cba)
