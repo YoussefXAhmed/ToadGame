@@ -90,11 +90,3 @@ You can build and run the project in any IDE like **Visual Studio**, or simply c
 ## Gameplay Screenshots
 
 ![Screenshot 1](![image](https://github.com/user-attachments/assets/43944560-958f-4463-988a-d1364e829cba)
-
-## License
-
-This game is released under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-Make sure to customize the repository URL, image links, and license if necessary. This README provides a clear description of how to set up and play the game, including prerequisites, instructions, and usage details.
